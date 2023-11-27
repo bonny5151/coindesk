@@ -1,20 +1,43 @@
 
 links=[]
+links2=[]
 rssfeed="" 
 function handle(r) { 
   rssfeed = this.responseXML
   links = Array.from(rssfeed.querySelectorAll("item")).map(i=>i.textContent.match(/coindesk.com(\/[^?&]+).*Daniel Kuhn/)).filter(i=>i).map(i=>i[1])
   delfromrss()
 } 
-const req = new XMLHttpRequest();
-req.addEventListener("load", handle);
-req.open("GET", "./arc/outboundfeeds/rss/");
-req.send();
+
+function fetchxml(url, handler) {
+
+  var req = new XMLHttpRequest();
+  req.addEventListener("load", handler);
+  req.open("GET", url)
+  req.send();
+}
+fetchxml( "./arc/outboundfeeds/rss/", handle);
+function handle2(r) {
+var parser = new DOMParser();
+var html = this.responseText
+console.log(html.length)
+if(html) {
+
+  var doc = parser.parseFromString(html,"text/html")
+  links2=Array.from(doc.querySelectorAll("h6 a.card-title")).map(i=>i.href)
+console.log(links2)
+ }
+
+}
+fetchxml("./author/daniel-kuhn/", handle2)
+
+
 
 function delfromrss()
 {
-
- links.forEach(i=>{ console.log("a[href='" +i+"']"); var a1 = Array.from(document.querySelectorAll("a[href='" +i+"']"));
+ var links3 = links2.map(i=>i.substr(46))
+ links.concat(links2).concat(links3).forEach(i=>{ 
+ var a1 = Array.from(document.querySelectorAll("a[href*='" +i+"']"));
+ 
  if(a1.length) { console.log("found"); a1.forEach(i1=>i1.parentElement.parentElement.remove()) }
   })
 
